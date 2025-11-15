@@ -54,7 +54,7 @@ func (user *User) Offline() {
 // 发送消息到广播Channel
 func (user *User) SendToBroadCastChannel(message string) {
 	fmt.Printf("Broadcast channel receives message from [%s]: %s\n", user.Name, message)
-	user.server.Message <- fmt.Sprintf("[%s]: %s", user.Name, message)
+	user.server.Message <- fmt.Sprintf("[%s]%s: %s", user.Addr, user.Name, message)
 }
 
 // 发送消息到user客户端

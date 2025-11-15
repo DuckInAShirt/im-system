@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"net"
+	"strings"
 	"sync"
 )
 
@@ -90,6 +91,21 @@ func (server *Server) ReceiveMessage(conn net.Conn, user *User) {
 		msg := string(buf[:n-1])
 		if msg == "who" {
 			user.CheckOnlineUsers()
+		} else if len(msg) > 7 && msg[:7] == "rename|" {
+			newName := strings.Split(msg, "|")[1]
+
+			_, ok := server.OnlineMap[newName]
+			if ok {
+				user.SendToBroadCastChannel(fmt.Sprintf("当前用户名[%s]已经被使用", newName))
+			} else {
+				server.mapLock.Lock()
+				delete(server.OnlineMap, user.Name)
+				server.OnlineMap[newName] = user
+				server.mapLock.Unlock()
+
+				user.Name = newName
+				user.SendToBroadCastChannel(fmt.Sprintf("您已修改用户名为[%s]", newName))
+			}
 		} else {
 			user.SendToBroadCastChannel(msg)
 		}
